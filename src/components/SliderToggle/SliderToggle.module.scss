@@ -1,0 +1,62 @@
+.toggle {
+  width: 52px;
+  height: 28px;
+  flex-shrink: 0;
+
+  border-radius: 6px;
+  border: none;
+
+  cursor: pointer;
+  padding: 4px;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  position: relative;
+  overflow: hidden;
+
+  transition: background-color 0.25s ease;
+}
+
+/* Estado ON - usa variable CSS del sistema */
+.on {
+  background-color: hsl(var(--primary));
+}
+
+/* Estado OFF - usa variable CSS del sistema */
+.off {
+  background-color: hsl(var(--destructive));
+}
+
+/* Thumb rectangular animado */
+.slider {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+
+  transition: transform 0.25s ease-out;
+}
+
+/* Desplazamiento cuando está ON */
+.on .slider {
+  transform: translateX(24px);
+}
+
+/* Pequeño "pop" al pulsar */
+.toggle:active .slider {
+  transform: scale(0.95);
+}
+
+.on.toggle:active .slider {
+  transform: translateX(24px) scale(0.95);
+}
+
+/* Focus state for accessibility */
+.toggle:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}

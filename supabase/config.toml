@@ -1,0 +1,4 @@
+project_id = "syrqsgjnzpjyabudozub"
+
+[functions.pvpc-prices]
+verify_jwt = false

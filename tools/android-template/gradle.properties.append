@@ -1,0 +1,8 @@
+# Force Gradle to use Java 21
+org.gradle.java.home=C:\\Program Files\\Java\\jdk-21
+
+# Signing (store file is relative to android/app)
+EVLOGGER_STORE_FILE=../evlogger-release.keystore
+EVLOGGER_KEY_ALIAS=evlogger
+EVLOGGER_STORE_PASSWORD=EvLogger_Release_2026!
+EVLOGGER_KEY_PASSWORD=EvLogger_Release_2026!

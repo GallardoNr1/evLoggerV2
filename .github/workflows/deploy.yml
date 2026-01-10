@@ -1,0 +1,49 @@
+name: Deploy EVLogger
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # --- Crear .env desde secret ---
+      - name: Crear .env
+        run: |
+          echo "$ENV_LOCAL" > .env
+        env:
+          ENV_LOCAL: ${{ secrets.ENV_LOCAL }}
+
+      # --- Instalación y build ---
+      - name: Install deps
+        run: npm install
+
+      - name: Build app
+        run: npm run build
+
+      # --- Copiar build al servidor ---
+      - name: Copiar build vía SSH
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          source: "dist/*"
+          target: "/var/www/evLogger"
+          strip_components: 1
+
+      # --- Opcional: Limpiar caché nginx si usas ---
+      - name: Reload Nginx (opcional)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            sudo systemctl reload nginx || true

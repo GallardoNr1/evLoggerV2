@@ -1,0 +1,117 @@
+@use "sass:color";
+
+// Design system colors
+$primary: hsl(174, 72%, 56%);      // electric teal/cyan
+$track-bg: hsl(222, 47%, 18%);     // darker secondary
+$thumb: hsl(45, 100%, 50%);        // highlight yellow/amber
+
+.rangeBlock {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.rangeHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.rangeValue {
+  font-variant-numeric: tabular-nums;
+  color: $primary;
+  font-weight: 600;
+}
+
+.trackWrapper {
+  position: relative;
+  height: 20px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+/* Fondo gris/oscuro rectangular */
+.trackBackground {
+  position: absolute;
+  inset: 0;
+  background: $track-bg;
+  border-radius: 6px;
+}
+
+/* Parte activa con color primario */
+.trackActive {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, $primary, color.adjust($primary, $lightness: 10%));
+  border-radius: 6px;
+  width: 0;
+  pointer-events: none;
+}
+
+/* El input range por encima, pero transparente */
+.rangeInput {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 20px;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  margin: 0;
+}
+
+.rangeInput:focus {
+  outline: none;
+}
+
+/* Track nativo invisible */
+.rangeInput::-webkit-slider-runnable-track {
+  height: 20px;
+  background: transparent;
+}
+
+.rangeInput::-moz-range-track {
+  height: 20px;
+  background: transparent;
+}
+
+/* Thumb rectangular estilo toggle */
+.rangeInput::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 20px;
+  background: $thumb;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  border: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.rangeInput::-moz-range-thumb {
+  width: 24px;
+  height: 20px;
+  background: $thumb;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  border: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Animación al pulsar */
+.rangeInput:active::-webkit-slider-thumb,
+.rangeInput:active::-moz-range-thumb {
+  transform: scale(0.95);
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0.18);
+}
+
+.rangeLimits {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: hsl(222, 15%, 50%);
+}

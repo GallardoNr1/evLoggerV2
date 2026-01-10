@@ -1,0 +1,247 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Space Grotesk loaded via index.html */
+
+@layer base {
+  :root,
+  .dark {
+    /* Dark theme as default - perfect for EV/energy apps */
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 9%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Electric teal/cyan - the "electric" energy feel */
+    --primary: 174 72% 56%;
+    --primary-foreground: 222 47% 6%;
+
+    --secondary: 222 47% 14%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 222 47% 14%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 174 72% 56%;
+    --accent-foreground: 222 47% 6%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 40% 98%;
+
+    /* Success/savings green */
+    --success: 142 71% 45%;
+    --success-foreground: 210 40% 98%;
+
+    /* Warning amber for peak prices */
+    --warning: 38 92% 50%;
+    --warning-foreground: 222 47% 6%;
+
+    /* Price indicators */
+    --price-low: 142 71% 45%;
+    --price-medium: 38 92% 50%;
+    --price-high: 0 72% 51%;
+
+    --border: 222 47% 16%;
+    --input: 222 47% 14%;
+    --ring: 174 72% 56%;
+
+    --radius: 0.7rem;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(
+      135deg,
+      hsl(174 72% 56%),
+      hsl(186 72% 46%)
+    );
+    --gradient-card: linear-gradient(180deg, hsl(222 47% 10%), hsl(222 47% 8%));
+    --gradient-glow: radial-gradient(
+      ellipse at center,
+      hsl(174 72% 56% / 0.15),
+      transparent 70%
+    );
+
+    /* Shadows */
+    --shadow-sm: 0 2px 8px hsl(222 47% 4% / 0.4);
+    --shadow-md: 0 4px 16px hsl(222 47% 4% / 0.5);
+    --shadow-glow: 0 0 30px hsl(174 72% 56% / 0.3);
+
+    --sidebar-background: 222 47% 6%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 174 72% 56%;
+    --sidebar-primary-foreground: 222 47% 6%;
+    --sidebar-accent: 222 47% 14%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 222 47% 16%;
+    --sidebar-ring: 174 72% 56%;
+  }
+
+  .light {
+    /* Light theme */
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Electric teal/cyan - kept consistent */
+    --primary: 174 72% 40%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 94%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 94%;
+    --muted-foreground: 215 16% 40%;
+
+    --accent: 174 72% 40%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 40% 98%;
+
+    /* Success/savings green */
+    --success: 142 71% 35%;
+    --success-foreground: 210 40% 98%;
+
+    /* Warning amber for peak prices */
+    --warning: 38 92% 45%;
+    --warning-foreground: 222 47% 11%;
+
+    /* Price indicators */
+    --price-low: 142 71% 35%;
+    --price-medium: 38 92% 45%;
+    --price-high: 0 72% 51%;
+
+    --border: 214 32% 85%;
+    --input: 214 32% 91%;
+    --ring: 174 72% 40%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(
+      135deg,
+      hsl(174 72% 40%),
+      hsl(186 72% 35%)
+    );
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 40% 98%));
+    --gradient-glow: radial-gradient(
+      ellipse at center,
+      hsl(174 72% 40% / 0.1),
+      transparent 70%
+    );
+
+    /* Shadows */
+    --shadow-sm: 0 2px 8px hsl(222 47% 11% / 0.08);
+    --shadow-md: 0 4px 16px hsl(222 47% 11% / 0.12);
+    --shadow-glow: 0 0 30px hsl(174 72% 40% / 0.2);
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 174 72% 40%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 210 40% 94%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 214 32% 85%;
+    --sidebar-ring: 174 72% 40%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    /* Support for safe area insets on iOS/Android */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right)
+      env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    /* Ensure content doesn't go behind navigation bars */
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+
+  /* Custom scrollbar for dark theme */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-secondary;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/30 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/50;
+  }
+}
+
+@layer components {
+  .font-mono {
+    font-family: "JetBrains Mono", monospace;
+  }
+
+  /* Glass morphism effect for cards */
+  .glass {
+    @apply bg-card/80 backdrop-blur-xl border border-border/50;
+  }
+
+  /* Glow effect for primary elements */
+  .glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  /* Price indicator badges */
+  .price-low {
+    @apply bg-success/20 text-success border-success/30;
+  }
+
+  .price-medium {
+    @apply bg-warning/20 text-warning border-warning/30;
+  }
+
+  .price-high {
+    @apply bg-destructive/20 text-destructive border-destructive/30;
+  }
+
+  /* Stat card hover effect */
+  .stat-card {
+    @apply transition-all duration-300 hover:scale-[1.02] hover:shadow-md;
+  }
+
+  /* Session card */
+  .session-card {
+    @apply bg-card border border-border rounded-2xl p-4 transition-all duration-200;
+  }
+
+  .session-card:active {
+    @apply scale-[0.98] bg-secondary;
+  }
+}
+
+@layer utilities {
+  /* Text gradient utility */
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-primary);
+  }
+
+  /* Animate number changes */
+  .animate-number {
+    @apply transition-all duration-500 ease-out;
+  }
+}

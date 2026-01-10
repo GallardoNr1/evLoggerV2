@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">EVLogger</string>
+    <string name="title_activity_main">EVLogger</string>
+    <string name="package_name">dev.gallardcode.evlogger</string>
+    <string name="custom_url_scheme">dev.gallardcode.evlogger</string>
+</resources>

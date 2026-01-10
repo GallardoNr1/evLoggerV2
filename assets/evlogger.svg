@@ -1,0 +1,32 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Carga Space Grotesk real desde Google Fonts -->
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;display=swap');
+      .bg { fill: #071C3A; }
+      .neon { fill: none; stroke: #38F3FF; stroke-width: 18; stroke-linecap: round; stroke-linejoin: round; }
+      .glow { filter: drop-shadow(0 0 14px rgba(56,243,255,.55)); }
+      .txt {
+        font-family: "Space Grotesk", Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        font-size: 110px;
+        font-weight: 600;
+        letter-spacing: -1px;
+        fill: #38F3FF;
+      }
+    </style>
+  </defs>
+
+  <!-- Fondo -->
+  <rect class="bg" x="0" y="0" width="1024" height="1024" rx="120"></rect>
+
+  <!-- Batería horizontal (sin rayo) -->
+  <g class="glow" transform="translate(0,0)">
+    <!-- cuerpo -->
+    <rect class="neon" x="232" y="360" width="560" height="230" rx="36"></rect>
+    <!-- terminal -->
+    <rect class="neon" x="808" y="426" width="44" height="98" rx="18"></rect>
+  </g>
+
+  <!-- Texto -->
+  <text x="512" y="730" text-anchor="middle" class="txt glow">EVLogger</text>
+</svg>
