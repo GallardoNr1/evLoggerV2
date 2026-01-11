@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { Car, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatsGrid } from "@/components/StatsGrid";
 import { PeriodSummary } from "@/components/PeriodSummary";
 import { FuelComparisonChart } from "@/components/FuelComparisonChart";
 import { SessionsList } from "@/components/SessionsList";
+import { SessionDetailSheet } from "@/components/SessionDetailSheet";
 import { cn } from "@/lib/utils";
 import type { ChargingSession, MonthlyStats } from "@/types/evlogger";
 import type { Vehicle } from "@/hooks/useVehicles";
@@ -28,6 +30,8 @@ export const StatsView = ({
   settings,
   onDeleteSession,
 }: StatsViewProps) => {
+  const [selectedSession, setSelectedSession] = useState<ChargingSession | null>(null);
+
   return (
     <>
       {/* Vehicle filter */}
@@ -110,13 +114,18 @@ export const StatsView = ({
       >
         <SessionsList
           sessions={sessions}
-          onSessionClick={() => {
-            /* TODO: implement session detail view */
-          }}
+          onSessionClick={setSelectedSession}
           onDeleteSession={onDeleteSession}
           showFuelSavings={settings?.showFuelSavings ?? true}
         />
       </section>
+
+      {/* Session detail sheet */}
+      <SessionDetailSheet
+        session={selectedSession}
+        open={!!selectedSession}
+        onOpenChange={(open) => !open && setSelectedSession(null)}
+      />
     </>
   );
 };

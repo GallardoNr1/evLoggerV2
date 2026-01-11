@@ -1,7 +1,9 @@
 import { Loader2 } from "lucide-react";
+import { useState } from "react";
 import { CurrentPriceCard } from "@/components/CurrentPriceCard";
 import { StatsGrid } from "@/components/StatsGrid";
 import { SessionsList } from "@/components/SessionsList";
+import { SessionDetailSheet } from "@/components/SessionDetailSheet";
 import type { ChargingSession, MonthlyStats, HourlyPrice } from "@/types/evlogger";
 
 interface DashboardViewProps {
@@ -29,6 +31,8 @@ export const DashboardView = ({
   showFuelSavings,
   onDeleteSession,
 }: DashboardViewProps) => {
+  const [selectedSession, setSelectedSession] = useState<ChargingSession | null>(null);
+
   return (
     <>
       {/* Current price card */}
@@ -71,11 +75,18 @@ export const DashboardView = ({
       >
         <SessionsList
           sessions={sessions.slice(0, 3)}
-          onSessionClick={() => {/* TODO: implement session detail view */}}
+          onSessionClick={setSelectedSession}
           onDeleteSession={onDeleteSession}
           showFuelSavings={showFuelSavings}
         />
       </section>
+
+      {/* Session detail sheet */}
+      <SessionDetailSheet
+        session={selectedSession}
+        open={!!selectedSession}
+        onOpenChange={(open) => !open && setSelectedSession(null)}
+      />
     </>
   );
 };

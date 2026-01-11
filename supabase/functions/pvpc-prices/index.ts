@@ -96,8 +96,13 @@ Deno.serve(async (req) => {
       const startsAt = new Date(item.datetime);
       const endsAt = new Date(startsAt.getTime() + 60 * 60 * 1000); // +1 hour
       
+      // Extract hour from the original datetime string to preserve Spanish timezone
+      // The API returns datetime like "2024-01-11T00:00:00.000+01:00"
+      const hourMatch = item.datetime.match(/T(\d{2}):/);
+      const hour = hourMatch ? parseInt(hourMatch[1], 10) : startsAt.getUTCHours();
+      
       return {
-        hour: startsAt.getHours(),
+        hour,
         price: item.value / 1000, // Convert from €/MWh to €/kWh
         datetime: item.datetime,
         startsAt: startsAt.toISOString(),
