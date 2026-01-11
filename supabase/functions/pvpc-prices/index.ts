@@ -1,13 +1,14 @@
 /// <reference types="https://esm.sh/@supabase/functions-js/src/edge-runtime.d.ts" />
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+};
 
 interface ESIOSValue {
-  value: number;
-  datetime: string;
+  value: number; // €/MWh
+  datetime: string; // e.g. "2026-01-12T00:00:00.000+01:00" (inicio del tramo)
   geo_id: number;
   geo_name: string;
 }
@@ -21,111 +22,140 @@ interface ESIOSResponse {
 }
 
 interface PriceResult {
-  hour: number;
-  price: number;
-  datetime: string;
-  startsAt: string;
-  endsAt: string;
+  hour: number; // 0..23 (inicio del tramo en hora España)
+  price: number; // €/kWh
+  datetime: string; // datetime original con +01:00/+02:00
+}
+
+/**
+ * Extrae HH (00..23) del string ISO con offset.
+ * No depende de la TZ del runtime (que en Supabase suele ser UTC).
+ */
+function extractHour(datetime: string): number {
+  const hh = datetime.slice(11, 13);
+  const n = Number(hh);
+  return Number.isFinite(n) ? n : -1;
+}
+
+function isValidDateStr(dateStr: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(dateStr);
+}
+
+async function readDateStr(req: Request): Promise<string> {
+  // POST: body.date, GET: query param date, fallback: hoy (UTC)
+  if (req.method === "POST") {
+    try {
+      const body = await req.json();
+      const date = body?.date;
+      if (typeof date === "string" && isValidDateStr(date)) return date;
+    } catch {
+      // ignore
+    }
+  } else {
+    const url = new URL(req.url);
+    const date = url.searchParams.get("date");
+    if (date && isValidDateStr(date)) return date;
+  }
+
+  // Fallback (hoy)
+  return new Date().toISOString().split("T")[0];
 }
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+  // CORS preflight
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const apiKey = Deno.env.get('VITE_ESIOS_API_KEY')
-    
-    if (!apiKey) {
-      console.error('ESIOS API key not configured')
-      throw new Error('ESIOS API key not configured')
+    const apiKey = Deno.env.get("VITE_ESIOS_API_KEY");
+    if (!apiKey) throw new Error("ESIOS API key not configured");
+
+    const dateStr = await readDateStr(req);
+    if (!isValidDateStr(dateStr)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid date format. Use YYYY-MM-DD" }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
-    // Parse request body for date parameter
-    let dateStr: string;
-    
-    if (req.method === 'POST') {
-      try {
-        const body = await req.json();
-        dateStr = body.date || new Date().toISOString().split('T')[0];
-      } catch {
-        dateStr = new Date().toISOString().split('T')[0];
-      }
-    } else {
-      // GET request - use query params or today
-      const url = new URL(req.url);
-      dateStr = url.searchParams.get('date') || new Date().toISOString().split('T')[0];
-    }
-    
-    // Validate date format (YYYY-MM-DD)
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-      throw new Error('Invalid date format. Use YYYY-MM-DD');
-    }
-    
-    // PVPC indicator ID: 1001 (Precio voluntario para el pequeño consumidor)
-    const url = `https://api.esios.ree.es/indicators/1001?start_date=${dateStr}T00:00&end_date=${dateStr}T23:59`
-    
-    console.log('Fetching PVPC prices from ESIOS API:', url)
-    
-    const response = await fetch(url, {
+    const esiosUrl = `https://api.esios.ree.es/indicators/1001?start_date=${dateStr}T00:00&end_date=${dateStr}T23:59`;
+
+    // --- LOGS mínimos útiles ---
+    console.log("PVPC request:", {
+      method: req.method,
+      dateStr,
+      esiosUrl,
+      runtimeTZ: Deno.env.get("TZ") ?? "(not set)",
+      nowISO: new Date().toISOString(),
+    });
+
+    const response = await fetch(esiosUrl, {
       headers: {
-        'Accept': 'application/json; application/vnd.esios-api-v1+json',
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
+        Accept: "application/json; application/vnd.esios-api-v1+json",
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
       },
-    })
-    
+    });
+
     if (!response.ok) {
-      const errorText = await response.text()
-      console.error('ESIOS API error:', response.status, errorText)
-      throw new Error(`ESIOS API error: ${response.status}`)
+      const errorText = await response.text();
+      console.error("ESIOS API error:", { status: response.status, errorText });
+      return new Response(
+        JSON.stringify({ error: `ESIOS API error: ${response.status}` }),
+        {
+          status: 502,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
-    
-    const data: ESIOSResponse = await response.json()
-    console.log('Successfully fetched prices, entries:', data.indicator?.values?.length || 0)
-    
-    // Filter only Peninsula prices (geo_id: 8741) and transform
-    const peninsulaValues = (data.indicator?.values || []).filter(
-      (item) => item.geo_id === 8741
-    )
-    
-    console.log('Filtered Peninsula prices:', peninsulaValues.length)
-    
-    const prices: PriceResult[] = peninsulaValues.map((item) => {
-      const startsAt = new Date(item.datetime);
-      const endsAt = new Date(startsAt.getTime() + 60 * 60 * 1000); // +1 hour
-      
-      // Extract hour from the original datetime string to preserve Spanish timezone
-      // The API returns datetime like "2024-01-11T00:00:00.000+01:00"
-      const hourMatch = item.datetime.match(/T(\d{2}):/);
-      const hour = hourMatch ? parseInt(hourMatch[1], 10) : startsAt.getUTCHours();
-      
-      return {
-        hour,
-        price: item.value / 1000, // Convert from €/MWh to €/kWh
-        datetime: item.datetime,
-        startsAt: startsAt.toISOString(),
-        endsAt: endsAt.toISOString(),
-      }
-    }).sort((a, b) => a.hour - b.hour)
-    
-    return new Response(JSON.stringify({ 
-      prices,
-      date: dateStr,
-      count: prices.length 
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error'
-    console.error('Error fetching prices:', message)
+
+    const data: ESIOSResponse = await response.json();
+    const all = data.indicator?.values ?? [];
+
+    // Filtra Península (8741)
+    const peninsula = all.filter((v) => v.geo_id === 8741);
+
+    // Mapea: datetime es INICIO del tramo -> hour = HH del string
+    const prices: PriceResult[] = peninsula
+      .map((item) => {
+        const hour = extractHour(item.datetime);
+
+        return {
+          hour,
+          price: item.value / 1000, // €/kWh
+          datetime: item.datetime,
+        };
+      })
+      .filter((p) => p.hour >= 0 && p.hour <= 23)
+      .sort((a, b) => a.hour - b.hour);
+
+    // Logs de verificación (solo 3 items)
+    console.log("PVPC peninsula summary:", {
+      totalValues: all.length,
+      peninsulaValues: peninsula.length,
+      returned: prices.length,
+      first3: prices.slice(0, 3),
+      last3: prices.slice(-3),
+    });
+
     return new Response(
-      JSON.stringify({ error: message }),
-      { 
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
-    )
+      JSON.stringify({
+        prices,
+        date: dateStr,
+        count: prices.length,
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("PVPC function error:", message);
+    return new Response(JSON.stringify({ error: message }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
-})
+});

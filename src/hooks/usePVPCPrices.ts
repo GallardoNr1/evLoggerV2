@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
-import { fetchPVPCPrices, type PVPCPrice } from '@/api/pvpcClient';
-import { format, addDays, subDays } from 'date-fns';
+import { useState, useEffect, useCallback } from "react";
+import { fetchPVPCPrices, type PVPCPrice } from "@/api/pvpcClient";
+import { format, addDays, subDays } from "date-fns";
 
-export type PriceDay = 'yesterday' | 'today' | 'tomorrow';
+export type PriceDay = "yesterday" | "today" | "tomorrow";
 
-export function usePVPCPrices(day: PriceDay = 'today') {
+export function usePVPCPrices(day: PriceDay = "today") {
   const [prices, setPrices] = useState<PVPCPrice[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -13,19 +13,19 @@ export function usePVPCPrices(day: PriceDay = 'today') {
   const getDateForDay = useCallback((targetDay: PriceDay): string => {
     const today = new Date();
     switch (targetDay) {
-      case 'yesterday':
-        return format(subDays(today, 1), 'yyyy-MM-dd');
-      case 'tomorrow':
-        return format(addDays(today, 1), 'yyyy-MM-dd');
-      case 'today':
+      case "yesterday":
+        return format(subDays(today, 1), "yyyy-MM-dd");
+      case "tomorrow":
+        return format(addDays(today, 1), "yyyy-MM-dd");
+      case "today":
       default:
-        return format(today, 'yyyy-MM-dd');
+        return format(today, "yyyy-MM-dd");
     }
   }, []);
 
   const checkTomorrowAvailability = useCallback(async () => {
     try {
-      const tomorrowDate = format(addDays(new Date(), 1), 'yyyy-MM-dd');
+      const tomorrowDate = format(addDays(new Date(), 1), "yyyy-MM-dd");
       const tomorrowPrices = await fetchPVPCPrices(tomorrowDate);
       setTomorrowAvailable(tomorrowPrices.length > 0);
     } catch {
@@ -38,11 +38,12 @@ export function usePVPCPrices(day: PriceDay = 'today') {
       setLoading(true);
       const dateStr = getDateForDay(day);
       const data = await fetchPVPCPrices(dateStr);
+
       setPrices(data);
       setError(null);
     } catch (e) {
-      console.error('Error fetching PVPC prices:', e);
-      setError(e instanceof Error ? e : new Error('Error loading prices'));
+      console.error("Error fetching PVPC prices:", e);
+      setError(e instanceof Error ? e : new Error("Error loading prices"));
       setPrices([]);
     } finally {
       setLoading(false);
@@ -51,7 +52,7 @@ export function usePVPCPrices(day: PriceDay = 'today') {
 
   // Check tomorrow availability on mount and when day changes to today
   useEffect(() => {
-    if (day === 'today') {
+    if (day === "today") {
       checkTomorrowAvailability();
     }
   }, [day, checkTomorrowAvailability]);

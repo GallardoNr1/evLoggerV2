@@ -2,7 +2,7 @@
  * Cliente para obtener precios PVPC via edge function (ESIOS API)
  */
 
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from "@/integrations/supabase/client";
 
 export type PVPCPrice = {
   hour: number;
@@ -26,22 +26,26 @@ interface PVPCResponse {
  * @param dateStr Fecha en formato YYYY-MM-DD (opcional, por defecto hoy)
  */
 export async function fetchPVPCPrices(dateStr?: string): Promise<PVPCPrice[]> {
-  const targetDate = dateStr || new Date().toISOString().split('T')[0];
-  
-  const { data, error } = await supabase.functions.invoke<PVPCResponse>('pvpc-prices', {
-    body: { date: targetDate }
-  });
-  
+  const targetDate = dateStr || new Date().toISOString().split("T")[0];
+
+  const { data, error } = await supabase.functions.invoke<PVPCResponse>(
+    "pvpc-prices",
+    {
+      body: { date: targetDate },
+    },
+  );
+
   if (error) {
     throw new Error(`Error fetching PVPC prices: ${error.message}`);
   }
-  
+
   if (data?.error) {
     throw new Error(`Error fetching PVPC prices: ${data.error}`);
   }
-  
-  const date = new Date(targetDate);
-  
+
+  const [y, m, d] = targetDate.split("-").map(Number);
+  const date = new Date(y, m - 1, d); // 👈 local, 00:00 local
+  console.log("moi->0", data);
   return (data?.prices || []).map((item) => ({
     hour: item.hour,
     price: item.price,
