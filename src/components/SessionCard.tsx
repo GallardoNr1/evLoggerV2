@@ -71,14 +71,12 @@ export const SessionCard = ({
 
             {/* Time and energy */}
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
-              {session.startTime &&
-                session.endTime &&
-                session.startTime !== "00:00" && (
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {session.startTime} - {session.endTime}
-                  </div>
-                )}
+              {session.startTime && session.endTime && (
+                <div className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  {session.startTime} - {session.endTime}
+                </div>
+              )}
               <div className="flex items-center gap-1">
                 <Battery className="h-3 w-3" />
                 {session.kWhCharged.toFixed(1)} kWh

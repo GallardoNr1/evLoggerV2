@@ -78,10 +78,7 @@ export const PriceBreakdownList = ({
             )}
           >
             <span className="text-sm text-muted-foreground">
-              {`${String(price.hour).padStart(2, "0")}:00 – ${String(
-                (price.hour + 1) % 24,
-              ).padStart(2, "0")}:00`}
-
+              {price.hour.toString().padStart(2, "0")}:00
               {isCurrentHour && (
                 <span className="ml-2 text-xs text-primary">• Ahora</span>
               )}

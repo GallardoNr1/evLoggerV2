@@ -57,22 +57,50 @@ const Index = () => {
   const currentPrice = todayPrices.find((p) => p.hour === currentHour) ?? todayPrices[0];
   const nextPrice = todayPrices.find((p) => p.hour === currentHour + 1);
 
+  // Helper to format time in Spanish timezone
+  const formatTimeInSpain = (dateStr: string): string => {
+    const date = new Date(dateStr);
+    return date.toLocaleTimeString('es-ES', {
+      timeZone: 'Europe/Madrid',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+  };
+
+  // Helper to get date in Spanish timezone
+  const getDateInSpain = (dateStr: string): Date => {
+    // Parse the date and create a new Date object adjusted for display
+    const date = new Date(dateStr);
+    // Get the date parts in Spanish timezone
+    const parts = new Intl.DateTimeFormat('es-ES', {
+      timeZone: 'Europe/Madrid',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).formatToParts(date);
+    
+    const year = parseInt(parts.find(p => p.type === 'year')?.value ?? '2026');
+    const month = parseInt(parts.find(p => p.type === 'month')?.value ?? '1') - 1;
+    const day = parseInt(parts.find(p => p.type === 'day')?.value ?? '1');
+    
+    return new Date(year, month, day);
+  };
+
   // Convertir sesiones de DB a formato ChargingSession
   const sessions = useMemo<ChargingSession[]>(() => {
     return dbSessions.map((s) => {
-      const startDate = new Date(s.startedAt);
-      const endDate = new Date(s.endedAt);
       const vehicleName = vehicles.find((v) => v.id === s.vehicleId)?.name ?? "Vehículo";
 
       return {
         id: s.id,
-        date: startDate,
-        startTime: startDate.toTimeString().slice(0, 5),
-        endTime: endDate.toTimeString().slice(0, 5),
+        date: getDateInSpain(s.startedAt),
+        startTime: formatTimeInSpain(s.startedAt),
+        endTime: formatTimeInSpain(s.endedAt),
         kWhCharged: s.kWh,
         averagePrice: s.kWh > 0 ? (s.cost ?? 0) / s.kWh : 0,
         totalCost: s.cost ?? 0,
-        location: "Casa",
+        location: s.location ?? "Casa",
         vehicleName,
         vehicleId: s.vehicleId,
       };
@@ -128,12 +156,24 @@ const Index = () => {
     averagePrice: number;
     vehicleId: string;
   }) => {
-    const startedAt = session.startTime
-      ? new Date(`${session.date}T${session.startTime}:00`).toISOString()
-      : new Date(`${session.date}T00:00:00`).toISOString();
-    const endedAt = session.endTime
-      ? new Date(`${session.date}T${session.endTime}:00`).toISOString()
-      : new Date(`${session.date}T00:00:00`).toISOString();
+    // Build timestamps with explicit Spanish timezone offset to avoid UTC conversion issues
+    // Spain is UTC+1 (CET) or UTC+2 (CEST during summer)
+    const buildSpanishTimestamp = (date: string, time: string): string => {
+      if (!time) {
+        // For sessions without time, use midnight in Spanish timezone
+        return `${date}T00:00:00+01:00`;
+      }
+      // Determine if date is in summer time (CEST = UTC+2) or winter time (CET = UTC+1)
+      const dateObj = new Date(`${date}T12:00:00`);
+      const month = dateObj.getMonth(); // 0-11
+      // Rough estimate: April-October is summer time (CEST, UTC+2)
+      const isSummerTime = month >= 3 && month <= 9;
+      const offset = isSummerTime ? '+02:00' : '+01:00';
+      return `${date}T${time}:00${offset}`;
+    };
+
+    const startedAt = buildSpanishTimestamp(session.date, session.startTime);
+    const endedAt = buildSpanishTimestamp(session.date, session.endTime);
 
     await addSession({
       vehicleId: session.vehicleId,
