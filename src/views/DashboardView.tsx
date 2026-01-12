@@ -4,7 +4,11 @@ import { CurrentPriceCard } from "@/components/CurrentPriceCard";
 import { StatsGrid } from "@/components/StatsGrid";
 import { SessionsList } from "@/components/SessionsList";
 import { SessionDetailSheet } from "@/components/SessionDetailSheet";
-import type { ChargingSession, MonthlyStats, HourlyPrice } from "@/types/evlogger";
+import type {
+  ChargingSession,
+  MonthlyStats,
+  HourlyPrice,
+} from "@/types/evlogger";
 
 interface DashboardViewProps {
   pricesLoading: boolean;
@@ -31,7 +35,8 @@ export const DashboardView = ({
   showFuelSavings,
   onDeleteSession,
 }: DashboardViewProps) => {
-  const [selectedSession, setSelectedSession] = useState<ChargingSession | null>(null);
+  const [selectedSession, setSelectedSession] =
+    useState<ChargingSession | null>(null);
 
   return (
     <>
@@ -61,18 +66,12 @@ export const DashboardView = ({
       </section>
 
       {/* Monthly stats grid */}
-      <section
-        className="animate-fade-in"
-        style={{ animationDelay: "100ms" }}
-      >
+      <section className="animate-fade-in" style={{ animationDelay: "100ms" }}>
         <StatsGrid stats={stats} />
       </section>
 
       {/* Recent sessions */}
-      <section
-        className="animate-fade-in"
-        style={{ animationDelay: "200ms" }}
-      >
+      <section className="animate-fade-in" style={{ animationDelay: "200ms" }}>
         <SessionsList
           sessions={sessions.slice(0, 3)}
           onSessionClick={setSelectedSession}
@@ -86,6 +85,7 @@ export const DashboardView = ({
         session={selectedSession}
         open={!!selectedSession}
         onOpenChange={(open) => !open && setSelectedSession(null)}
+        onDelete={onDeleteSession}
       />
     </>
   );

@@ -30,7 +30,8 @@ export const StatsView = ({
   settings,
   onDeleteSession,
 }: StatsViewProps) => {
-  const [selectedSession, setSelectedSession] = useState<ChargingSession | null>(null);
+  const [selectedSession, setSelectedSession] =
+    useState<ChargingSession | null>(null);
 
   return (
     <>
@@ -125,6 +126,7 @@ export const StatsView = ({
         session={selectedSession}
         open={!!selectedSession}
         onOpenChange={(open) => !open && setSelectedSession(null)}
+        onDelete={onDeleteSession}
       />
     </>
   );

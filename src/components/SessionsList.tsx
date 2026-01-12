@@ -2,16 +2,7 @@ import { ChargingSession } from "@/types/evlogger";
 import { SessionCard } from "./SessionCard";
 import { History } from "lucide-react";
 import { useState } from "react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import ConfirmDeleteDialog from "./ConfirmDeleteDialog";
 
 interface SessionsListProps {
   sessions: ChargingSession[];
@@ -20,21 +11,12 @@ interface SessionsListProps {
   showFuelSavings?: boolean;
 }
 
-export const SessionsList = ({ 
-  sessions, 
-  onSessionClick, 
+export const SessionsList = ({
+  sessions,
+  onSessionClick,
   onDeleteSession,
-  showFuelSavings = true 
+  showFuelSavings = true,
 }: SessionsListProps) => {
-  const [deleteId, setDeleteId] = useState<string | null>(null);
-
-  const handleConfirmDelete = () => {
-    if (deleteId && onDeleteSession) {
-      onDeleteSession(deleteId);
-    }
-    setDeleteId(null);
-  };
-
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
@@ -49,43 +31,19 @@ export const SessionsList = ({
 
       <div className="space-y-2">
         {sessions.map((session, index) => (
-          <div 
+          <div
             key={session.id}
             className="animate-fade-in"
             style={{ animationDelay: `${index * 50}ms` }}
           >
-            <SessionCard 
-              session={session} 
+            <SessionCard
+              session={session}
               onClick={() => onSessionClick?.(session)}
-              onDelete={onDeleteSession ? setDeleteId : undefined}
               showFuelSavings={showFuelSavings}
             />
           </div>
         ))}
       </div>
-
-      {/* Delete confirmation dialog */}
-      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent className="bg-card border-border">
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar sesión de carga?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción no se puede deshacer. La sesión será eliminada permanentemente.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-secondary">
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 };

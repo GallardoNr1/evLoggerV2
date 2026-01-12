@@ -17,14 +17,12 @@ import { Button } from "./ui/button";
 interface SessionCardProps {
   session: ChargingSession;
   onClick?: () => void;
-  onDelete?: (id: string) => void;
   showFuelSavings?: boolean;
 }
 
 export const SessionCard = ({
   session,
   onClick,
-  onDelete,
   showFuelSavings = true,
 }: SessionCardProps) => {
   const priceLevel = getPriceLevel(session.averagePrice);
@@ -33,11 +31,6 @@ export const SessionCard = ({
     low: "text-success border-success/30 bg-success/10",
     medium: "text-warning border-warning/30 bg-warning/10",
     high: "text-destructive border-destructive/30 bg-destructive/10",
-  };
-
-  const handleDelete = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onDelete?.(session.id);
   };
 
   return (
@@ -110,25 +103,6 @@ export const SessionCard = ({
             </div>
           </div>
         </div>
-
-        {/* Delete button - separate column */}
-        {onDelete && (
-          <Button
-            onClick={handleDelete}
-            type="button"
-            variant="ghost"
-            className={cn(
-              "absolute -bottom-2 -right-2 z-10",
-              "h-6 w-6 p-0 rounded-full",
-              "bg-background border border-destructive text-destructive",
-              "hover:bg-destructive/30 hover:border-destructive hover:text-destructive",
-              "focus-visible:ring-2 focus-visible:ring-destructive/30 focus-visible:ring-offset-2",
-            )}
-            aria-label="Eliminar sesión"
-          >
-            <Trash2 className="h-3 w-3" />
-          </Button>
-        )}
       </div>
     </div>
   );
