@@ -10,7 +10,7 @@ interface StatsGridProps {
 export const StatsGrid = ({ stats }: StatsGridProps) => {
   const statItems = [
     {
-      label: "kWh este mes",
+      label: "kWh totales",
       value: `${stats.totalKWh.toFixed(1)}`,
       unit: "kWh",
       icon: Battery,
@@ -49,7 +49,7 @@ export const StatsGrid = ({ stats }: StatsGridProps) => {
           key={item.label}
           className={cn(
             "stat-card rounded-2xl border border-border p-4",
-            item.highlight && "border-success/30"
+            item.highlight && "border-success/30",
           )}
           style={{ animationDelay: `${index * 100}ms` }}
         >
