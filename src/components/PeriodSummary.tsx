@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
-import { Calendar, TrendingUp, Zap, Euro, BarChart3 } from "lucide-react";
+import { useMemo, useState, useEffect } from "react";
+import { Calendar, TrendingUp, Zap, Euro, BarChart3, ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import SegmentedControl from "@/components/SegmentedControl";
 import type { ChargingSession } from "@/types/evlogger";
 import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, isWithinInterval } from "date-fns";
@@ -13,18 +14,77 @@ type PeriodType = "month" | "year";
 
 export const PeriodSummary = ({ sessions }: PeriodSummaryProps) => {
   const [period, setPeriod] = useState<PeriodType>("month");
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  // Get unique periods with sessions
+  const availablePeriods = useMemo(() => {
+    const periodsSet = new Set<string>();
+    
+    sessions.forEach((s) => {
+      const date = new Date(s.date);
+      if (period === "month") {
+        periodsSet.add(format(date, "yyyy-MM"));
+      } else {
+        periodsSet.add(format(date, "yyyy"));
+      }
+    });
+
+    // Sort descending (most recent first)
+    return Array.from(periodsSet).sort((a, b) => b.localeCompare(a));
+  }, [sessions, period]);
+
+  // Reset index when period type changes or when available periods change
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [period, availablePeriods.length]);
+
+  const currentPeriodKey = availablePeriods[selectedIndex] ?? null;
+
+  const handlePrevious = () => {
+    if (selectedIndex < availablePeriods.length - 1) {
+      setSelectedIndex((prev) => prev + 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (selectedIndex > 0) {
+      setSelectedIndex((prev) => prev - 1);
+    }
+  };
+
+  const canGoPrevious = selectedIndex < availablePeriods.length - 1;
+  const canGoNext = selectedIndex > 0;
 
   const summary = useMemo(() => {
-    const now = new Date();
+    if (!currentPeriodKey) {
+      return {
+        totalKWh: 0,
+        totalCost: 0,
+        totalSavings: 0,
+        sessionsCount: 0,
+        avgCostPerSession: 0,
+        avgKWhPerSession: 0,
+        avgPricePerKWh: 0,
+        periodLabel: period === "month" ? "Sin datos" : "Sin datos",
+      };
+    }
+
     let start: Date;
     let end: Date;
+    let periodLabel: string;
 
     if (period === "month") {
-      start = startOfMonth(now);
-      end = endOfMonth(now);
+      const [year, month] = currentPeriodKey.split("-").map(Number);
+      const date = new Date(year, month - 1, 1);
+      start = startOfMonth(date);
+      end = endOfMonth(date);
+      periodLabel = format(date, "MMMM yyyy", { locale: es });
     } else {
-      start = startOfYear(now);
-      end = endOfYear(now);
+      const year = Number(currentPeriodKey);
+      const date = new Date(year, 0, 1);
+      start = startOfYear(date);
+      end = endOfYear(date);
+      periodLabel = currentPeriodKey;
     }
 
     const filteredSessions = sessions.filter((s) =>
@@ -47,11 +107,9 @@ export const PeriodSummary = ({ sessions }: PeriodSummaryProps) => {
       avgCostPerSession,
       avgKWhPerSession,
       avgPricePerKWh,
-      periodLabel: period === "month" 
-        ? format(now, "MMMM yyyy", { locale: es })
-        : format(now, "yyyy"),
+      periodLabel,
     };
-  }, [sessions, period]);
+  }, [sessions, period, currentPeriodKey]);
 
   const formatCurrency = (value: number) => 
     new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(value);
@@ -74,9 +132,29 @@ export const PeriodSummary = ({ sessions }: PeriodSummaryProps) => {
         onChange={(val) => setPeriod(val as PeriodType)}
       />
 
-      <p className="mt-3 text-center text-sm text-muted-foreground capitalize">
-        {summary.periodLabel}
-      </p>
+      <div className="mt-3 flex items-center justify-center gap-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={handlePrevious}
+          disabled={!canGoPrevious}
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <span className="text-sm font-medium text-foreground capitalize min-w-[120px] text-center">
+          {summary.periodLabel}
+        </span>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={handleNext}
+          disabled={!canGoNext}
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
 
       {/* Totals */}
       <div className="mt-4 grid grid-cols-2 gap-3">
