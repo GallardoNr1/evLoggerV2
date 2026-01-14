@@ -10,8 +10,7 @@ export const CalculatorFloatingButton = () => {
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <button
-          className="fixed left-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-secondary border border-border text-foreground shadow-lg transition-all hover:scale-105 hover:bg-secondary/80 active:scale-95"
-          style={{ bottom: 'calc(6rem + env(safe-area-inset-bottom, 0px))' }}
+          className="flex h-14 w-14 items-center justify-center rounded-full bg-secondary border border-border text-foreground shadow-lg transition-all hover:scale-105 hover:bg-secondary/80 active:scale-95"
           aria-label="Calculadora de carga"
         >
           <Calculator className="h-6 w-6" />

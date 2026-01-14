@@ -251,8 +251,7 @@ export const AddSessionSheet = ({ onAddSession }: AddSessionSheetProps) => {
         <Button
           variant="glow"
           size="lg"
-          className="fixed right-4 z-50 h-14 w-14 rounded-full p-0 shadow-lg"
-          style={{ bottom: "calc(6rem + env(safe-area-inset-bottom, 0px))" }}
+          className="h-14 w-14 rounded-full p-0 shadow-lg"
         >
           <Plus className="h-6 w-6" />
         </Button>

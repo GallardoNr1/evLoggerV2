@@ -253,8 +253,16 @@ const Index = () => {
         {activeTab === "settings" && <SettingsView />}
       </main>
 
-      <CalculatorFloatingButton />
-      <AddSessionSheet onAddSession={handleAddSession} />
+      {/* Floating buttons container - respects main content width */}
+      <div 
+        className="pointer-events-none fixed inset-x-0 z-40 mx-auto max-w-md px-4"
+        style={{ bottom: 'calc(6rem + env(safe-area-inset-bottom, 0px))' }}
+      >
+        <div className="pointer-events-auto relative flex justify-between">
+          <CalculatorFloatingButton />
+          <AddSessionSheet onAddSession={handleAddSession} />
+        </div>
+      </div>
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
     </div>
   );
