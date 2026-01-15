@@ -6,6 +6,7 @@ export interface ChargingSession {
   kWhCharged: number;
   averagePrice: number;
   totalCost: number;
+  baseCost?: number; // Coste base antes de bono social e impuestos
   location?: string;
   vehicleName?: string;
   vehicleId?: string;

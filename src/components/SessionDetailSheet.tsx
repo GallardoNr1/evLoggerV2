@@ -21,6 +21,8 @@ import {
   Timer,
   Gauge,
   Trash2,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -31,8 +33,10 @@ import {
   fetchPricesForDate,
   type HourlyPriceData,
 } from "@/lib/sessionCostCalculator";
+import { calculateCostBreakdown, type CostBreakdown } from "@/lib/costCalculator";
 import { Button } from "./ui/button";
 import ConfirmDeleteDialog from "./ConfirmDeleteDialog";
+import { CostBreakdownDisplay } from "./CostBreakdownDisplay";
 
 interface SessionDetailSheetProps {
   session: ChargingSession | null;
@@ -58,6 +62,7 @@ export function SessionDetailSheet({
   const [pricesUsed, setPricesUsed] = useState<HourlyPriceData[]>([]);
   const [dayMinPrice, setDayMinPrice] = useState(0);
   const [dayMaxPrice, setDayMaxPrice] = useState(1);
+  const [showBreakdown, setShowBreakdown] = useState(false);
 
   // ✅ estado interno del confirm
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
@@ -66,6 +71,14 @@ export function SessionDetailSheet({
   const isHomeSession = !session?.location || session.location === "Casa";
   const hasValidTimes =
     session?.startTime && session?.endTime && session.startTime !== "00:00";
+
+  // Calcular el desglose de costes con impuestos
+  const costBreakdown: CostBreakdown | null = useMemo(() => {
+    if (!session) return null;
+    // Usamos el coste base (sin bono) para calcular el desglose completo
+    const baseCost = session.baseCost ?? session.totalCost;
+    return calculateCostBreakdown(baseCost, settings);
+  }, [session, settings]);
 
   useEffect(() => {
     if (!session || !open || isFixedContract || !isHomeSession) {
@@ -235,12 +248,24 @@ export function SessionDetailSheet({
           <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-base text-muted-foreground">
-                Coste total
+                Coste energía
               </span>
-              <span className="font-mono text-3xl font-bold text-primary">
+              <span className="font-mono text-2xl font-bold text-foreground">
                 {formatCurrency(session.totalCost)}
               </span>
             </div>
+
+            {/* Coste total con impuestos */}
+            {costBreakdown && (
+              <div className="flex items-center justify-between border-t border-border/50 pt-3">
+                <span className="text-base text-muted-foreground">
+                  Total con impuestos
+                </span>
+                <span className="font-mono text-3xl font-bold text-primary">
+                  {formatCurrency(costBreakdown.totalCost)}
+                </span>
+              </div>
+            )}
 
             {session.fuelSavings !== undefined && session.fuelSavings > 0 && (
               <div className="flex items-center justify-between border-t border-border/50 pt-3">
@@ -268,7 +293,35 @@ export function SessionDetailSheet({
                 {levelLabels[priceLevel]}
               </div>
             </div>
+
+            {/* Botón para ver desglose */}
+            {costBreakdown && (
+              <button
+                onClick={() => setShowBreakdown(!showBreakdown)}
+                className="w-full flex items-center justify-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors pt-2"
+              >
+                {showBreakdown ? (
+                  <>
+                    <ChevronUp className="h-4 w-4" />
+                    Ocultar desglose
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="h-4 w-4" />
+                    Ver desglose de impuestos
+                  </>
+                )}
+              </button>
+            )}
           </div>
+
+          {/* Desglose de costes expandible */}
+          {showBreakdown && costBreakdown && (
+            <CostBreakdownDisplay
+              breakdown={costBreakdown}
+              hasSocialBonus={settings?.hasSocialBonus ?? false}
+            />
+          )}
 
           {/* Hours used - PVPC home sessions */}
           {!isFixedContract && isHomeSession && pricesUsed.length > 0 && (

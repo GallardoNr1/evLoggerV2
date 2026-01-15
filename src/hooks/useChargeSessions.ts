@@ -9,6 +9,8 @@ export type ChargeSession = {
   endedAt: string;
   kWh: number;
   cost: number | null;
+  baseCost: number | null;
+  averagePrice: number | null;
   currency: string;
   location: string | null;
   createdAt: string;
@@ -21,6 +23,8 @@ export type CreateChargeSessionInput = {
   endedAt: string;
   kWh: number;
   cost?: number | null;
+  baseCost?: number | null;
+  averagePrice?: number | null;
   currency?: string;
   location?: string | null;
 };
@@ -34,6 +38,8 @@ function mapRow(row: any): ChargeSession {
     endedAt: row.ended_at,
     kWh: Number(row.kwh),
     cost: row.cost != null ? Number(row.cost) : null,
+    baseCost: row.base_cost != null ? Number(row.base_cost) : null,
+    averagePrice: row.average_price != null ? Number(row.average_price) : null,
     currency: row.currency ?? 'EUR',
     location: row.location ?? null,
     createdAt: row.created_at,
@@ -82,6 +88,8 @@ export function useChargeSessions(vehicleId?: string) {
           ended_at: input.endedAt,
           kwh: input.kWh,
           cost: input.cost ?? null,
+          base_cost: input.baseCost ?? null,
+          average_price: input.averagePrice ?? null,
           currency: input.currency ?? 'EUR',
           location: input.location ?? 'home',
         })

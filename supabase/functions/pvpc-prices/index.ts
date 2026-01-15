@@ -4,8 +4,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
 interface ESIOSValue {
@@ -110,8 +109,7 @@ Deno.serve(async (req) => {
       }
     } else {
       const url = new URL(req.url);
-      dateStr =
-        url.searchParams.get("date") || new Date().toISOString().split("T")[0];
+      dateStr = url.searchParams.get("date") || new Date().toISOString().split("T")[0];
     }
 
     if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
@@ -135,9 +133,7 @@ Deno.serve(async (req) => {
     }
 
     if (existingPrices && existingPrices.length >= 24) {
-      console.log(
-        `Found ${existingPrices.length} prices in database, returning cached data`,
-      );
+      console.log(`Found ${existingPrices.length} prices in database, returning cached data`);
 
       const prices: PriceResult[] = existingPrices
         .map((item: DbPrice) => {
@@ -191,9 +187,7 @@ Deno.serve(async (req) => {
 
     const data: ESIOSResponse = await response.json();
 
-    const peninsulaValues = (data.indicator?.values || []).filter(
-      (item) => item.geo_id === 8741,
-    );
+    const peninsulaValues = (data.indicator?.values || []).filter((item) => item.geo_id === 8741);
 
     console.log("Filtered Peninsula prices:", peninsulaValues.length);
 
@@ -240,12 +234,10 @@ Deno.serve(async (req) => {
       currency: "EUR",
     }));
 
-    const { error: insertError } = await supabase
-      .from("electricity_prices")
-      .upsert(pricesToInsert, {
-        onConflict: "starts_at",
-        ignoreDuplicates: true,
-      });
+    const { error: insertError } = await supabase.from("electricity_prices").upsert(pricesToInsert, {
+      onConflict: "starts_at",
+      ignoreDuplicates: true,
+    });
 
     if (insertError) {
       console.error("Error saving prices to database:", insertError);

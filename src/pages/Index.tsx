@@ -91,6 +91,7 @@ const Index = () => {
   const sessions = useMemo<ChargingSession[]>(() => {
     return dbSessions.map((s) => {
       const vehicleName = vehicles.find((v) => v.id === s.vehicleId)?.name ?? "Vehículo";
+      const avgPrice = s.averagePrice ?? (s.kWh > 0 ? (s.cost ?? 0) / s.kWh : 0);
 
       return {
         id: s.id,
@@ -98,8 +99,9 @@ const Index = () => {
         startTime: formatTimeInSpain(s.startedAt),
         endTime: formatTimeInSpain(s.endedAt),
         kWhCharged: s.kWh,
-        averagePrice: s.kWh > 0 ? (s.cost ?? 0) / s.kWh : 0,
+        averagePrice: avgPrice,
         totalCost: s.cost ?? 0,
+        baseCost: s.baseCost ?? s.cost ?? 0,
         location: s.location ?? "Casa",
         vehicleName,
         vehicleId: s.vehicleId,
@@ -181,6 +183,8 @@ const Index = () => {
       endedAt,
       kWh: session.kWhCharged,
       cost: session.discountedCost,
+      baseCost: session.baseCost,
+      averagePrice: session.averagePrice,
       location: session.location,
     });
   };
