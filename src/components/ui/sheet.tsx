@@ -70,7 +70,7 @@ const SheetContent = React.forwardRef<
       {...props}
     >
       {/* HEADER sticky */}
-      <div className="sticky top-0 z-10 bg-background px-6 py-4">
+      <div className="sticky top-0 z-10 px-6 py-4">
         <div className="relative">
           {/* aquí pones tu título/header */}
           {/* Puedes usar <SheetHeader> ... </SheetHeader> desde fuera */}
