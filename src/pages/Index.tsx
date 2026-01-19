@@ -197,8 +197,8 @@ const Index = () => {
     <div
       className="min-h-screen bg-background"
       style={{ 
-        paddingTop: "calc(5rem + env(safe-area-inset-top, 0px))",
-        paddingBottom: "calc(6rem + env(safe-area-inset-bottom, 0px))" 
+        paddingTop: "calc(4rem + env(safe-area-inset-top, 0px))",
+        paddingBottom: "calc(5.5rem + env(safe-area-inset-bottom, 0px))" 
       }}
     >
       <Header />

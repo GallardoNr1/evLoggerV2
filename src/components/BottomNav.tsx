@@ -1,4 +1,4 @@
-import { Home, BarChart3, Settings, Zap, HelpCircle } from "lucide-react";
+import { Home, BarChart3, Settings, Euro, HelpCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface BottomNavProps {
@@ -9,7 +9,7 @@ interface BottomNavProps {
 export const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
   const tabs = [
     { id: "dashboard", icon: Home, label: "Inicio" },
-    { id: "prices", icon: Zap, label: "Precios" },
+    { id: "prices", icon: Euro, label: "Precios" },
     { id: "stats", icon: BarChart3, label: "Stats" },
     { id: "info", icon: HelpCircle, label: "Info" },
     { id: "settings", icon: Settings, label: "Ajustes" },
@@ -22,35 +22,32 @@ export const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
       aria-label="Navegación principal"
       style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 0.75rem)' }}
     >
-      <div 
-        className="max-w-md w-full rounded-2xl border border-border bg-card/95 backdrop-blur-lg shadow-lg pointer-events-auto"
-      >
-        <div className="flex items-center justify-around px-2 py-2">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => onTabChange(tab.id)}
-              aria-current={activeTab === tab.id ? "page" : undefined}
-              aria-label={tab.label}
-              className={cn(
-                "relative flex flex-col items-center gap-1 rounded-xl px-4 py-2 transition-all",
-                activeTab === tab.id
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <tab.icon 
+      <div className="pointer-events-auto">
+        <div className="flex items-center gap-1 rounded-full bg-card/90 backdrop-blur-xl border border-border/50 p-1.5 shadow-lg">
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => onTabChange(tab.id)}
+                aria-current={isActive ? "page" : undefined}
+                aria-label={tab.label}
                 className={cn(
-                  "h-5 w-5 transition-transform",
-                  activeTab === tab.id && "scale-110"
-                )} 
-              />
-              <span className="text-xs font-medium">{tab.label}</span>
-              {activeTab === tab.id && (
-                <div className="absolute -bottom-0.5 h-0.5 w-8 rounded-full bg-primary" />
-              )}
-            </button>
-          ))}
+                  "relative flex items-center justify-center rounded-full p-3 transition-all duration-200",
+                  isActive
+                    ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-md"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/80"
+                )}
+              >
+                <tab.icon 
+                  className={cn(
+                    "h-5 w-5 transition-transform duration-200",
+                    isActive && "scale-110"
+                  )} 
+                />
+              </button>
+            );
+          })}
         </div>
       </div>
     </nav>

@@ -1,4 +1,4 @@
-import { Battery } from "lucide-react";
+import { Zap } from "lucide-react";
 import { ProfileMenu } from "@/components/ProfileMenu";
 
 export const Header = () => {
@@ -8,19 +8,18 @@ export const Header = () => {
       style={{ paddingTop: "max(env(safe-area-inset-top), 0.75rem)" }}
       role="banner"
     >
-      <div className="max-w-md w-full rounded-2xl border border-border bg-card/95 backdrop-blur-lg shadow-lg pointer-events-auto">
-        <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
-              <Battery className="h-5 w-5 text-primary" />
+      <div className="max-w-md w-full pointer-events-auto">
+        <div className="flex items-center justify-between px-1 py-1">
+          {/* Logo pill */}
+          <div className="flex items-center gap-2 rounded-full bg-card/90 backdrop-blur-xl border border-border/50 pl-1.5 pr-4 py-1.5 shadow-lg">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 shadow-md">
+              <Zap className="h-4 w-4 text-primary-foreground fill-primary-foreground" />
             </div>
-            <div>
-              <h1 className="text-base font-bold text-foreground">EVLogger</h1>
-              <p className="text-xs text-muted-foreground">Tu gestor de cargas</p>
-            </div>
+            <span className="text-sm font-bold text-foreground tracking-tight">EVLogger</span>
           </div>
 
-          <div className="flex items-center gap-2">
+          {/* Profile pill */}
+          <div className="rounded-full bg-card/90 backdrop-blur-xl border border-border/50 shadow-lg">
             <ProfileMenu />
           </div>
         </div>
