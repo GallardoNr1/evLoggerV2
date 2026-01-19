@@ -1,14 +1,7 @@
 import { useState } from "react";
 import { Calculator } from "lucide-react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ChargingCalculator } from "@/components/ChargingCalculator";
-import { Button } from "./ui/button";
 
 export const CalculatorFloatingButton = () => {
   const [open, setOpen] = useState(false);
@@ -16,19 +9,14 @@ export const CalculatorFloatingButton = () => {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button
-          variant="secondary"
-          size="xl"
-          className="h-14 w-14 rounded-full p-0 shadow-lg [&_svg]:size-6"
+        <button
+          className="flex h-14 w-14 items-center justify-center rounded-full bg-secondary border border-border text-foreground shadow-lg transition-all hover:scale-105 hover:bg-secondary/80 active:scale-95"
           aria-label="Calculadora de carga"
         >
           <Calculator className="h-6 w-6" />
-        </Button>
+        </button>
       </SheetTrigger>
-      <SheetContent
-        side="bottom"
-        className="max-h-[90vh] overflow-y-auto rounded-t-3xl"
-      >
+      <SheetContent side="bottom" className="max-h-[90vh] overflow-y-auto rounded-t-3xl">
         <SheetHeader className="mb-4">
           <SheetTitle>Calculadora de Carga</SheetTitle>
         </SheetHeader>

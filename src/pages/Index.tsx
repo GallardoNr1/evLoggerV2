@@ -196,13 +196,16 @@ const Index = () => {
   return (
     <div
       className="min-h-screen bg-background"
-      style={{ paddingBottom: "calc(6rem + env(safe-area-inset-bottom, 0px))" }}
+      style={{ 
+        paddingTop: "calc(5rem + env(safe-area-inset-top, 0px))",
+        paddingBottom: "calc(6rem + env(safe-area-inset-bottom, 0px))" 
+      }}
     >
       <Header />
 
       <main
         id="main-content"
-        className="mx-auto max-w-md space-y-6 px-4 py-6"
+        className="mx-auto max-w-md space-y-6 px-4 py-4"
         role="main"
       >
         {activeTab === "dashboard" && (

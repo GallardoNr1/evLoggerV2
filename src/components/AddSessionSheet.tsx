@@ -43,9 +43,7 @@ const getLocationHelpText = (
     return "Introduce el coste que has pagado";
   }
   if (isFixedContract) {
-    return `Coste calculado con tarifa fija (${(
-      (fixedPricePerKwh ?? 0) * 100
-    ).toFixed(2)}¢/kWh)`;
+    return `Coste calculado con tarifa fija (${((fixedPricePerKwh ?? 0) * 100).toFixed(2)}¢/kWh)`;
   }
   return "El coste se calculará automáticamente con precios PVPC";
 };
@@ -55,10 +53,7 @@ interface SubmitButtonContentProps {
   calculating: boolean;
 }
 
-const SubmitButtonContent = ({
-  saving,
-  calculating,
-}: SubmitButtonContentProps) => {
+const SubmitButtonContent = ({ saving, calculating }: SubmitButtonContentProps) => {
   if (saving) {
     return (
       <>
@@ -133,19 +128,18 @@ export const AddSessionSheet = ({ onAddSession }: AddSessionSheetProps) => {
 
   // Helper para determinar si se puede calcular el coste
   const checkCanCalculate = (): boolean => {
-    const hasValidKwh =
-      !!date && !!kWh && Number.parseFloat(kWh) > 0 && !!vehicleId;
-
+    const hasValidKwh = !!date && !!kWh && Number.parseFloat(kWh) > 0 && !!vehicleId;
+    
     if (!isHome) {
       // Fuera de casa: necesitamos coste manual
       return hasValidKwh && !!manualCost && Number.parseFloat(manualCost) > 0;
     }
-
+    
     if (isFixedContract) {
       // Tarifa fija: solo fecha, kWh y vehículo
       return hasValidKwh;
     }
-
+    
     // PVPC: también necesitamos horas
     return hasValidKwh && !!startTime && !!endTime;
   };
@@ -299,13 +293,14 @@ export const AddSessionSheet = ({ onAddSession }: AddSessionSheetProps) => {
                     onClick={() => setVehicleId(v.id)}
                     className={cn(
                       "relative",
-                      vehicleId === v.id &&
-                        "ring-2 ring-primary ring-offset-2 ring-offset-background",
+                      vehicleId === v.id && "ring-2 ring-primary ring-offset-2 ring-offset-background"
                     )}
                   >
                     <Car className="h-4 w-4" />
                     {v.name}
-                    {v.isFavorite && <Star className="h-3 w-3 fill-current" />}
+                    {v.isFavorite && (
+                      <Star className="h-3 w-3 fill-current" />
+                    )}
                   </Button>
                 ))}
               </div>
@@ -352,11 +347,7 @@ export const AddSessionSheet = ({ onAddSession }: AddSessionSheetProps) => {
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              {getLocationHelpText(
-                isHome,
-                isFixedContract,
-                settings?.fixedPricePerKwh,
-              )}
+              {getLocationHelpText(isHome, isFixedContract, settings?.fixedPricePerKwh)}
             </p>
           </div>
 
@@ -459,9 +450,7 @@ export const AddSessionSheet = ({ onAddSession }: AddSessionSheetProps) => {
             size="xl"
             className="w-full"
             onClick={handleSubmit}
-            disabled={
-              !canCalculate || (isHome && !costResult) || calculating || saving
-            }
+            disabled={!canCalculate || (isHome && !costResult) || calculating || saving}
           >
             <SubmitButtonContent saving={saving} calculating={calculating} />
           </Button>
