@@ -11,17 +11,27 @@ import { useChargeSessions } from "@/hooks/useChargeSessions";
 import { usePVPCPrices, type PriceDay } from "@/hooks/usePVPCPrices";
 import { applyBonusDiscount } from "@/lib/costCalculator";
 import { calculateFuelSavings } from "@/lib/fuelSavingsCalculator";
-import type { ChargingSession, MonthlyStats, HourlyPrice } from "@/types/evlogger";
+import type {
+  ChargingSession,
+  MonthlyStats,
+  HourlyPrice,
+} from "@/types/evlogger";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [priceDay, setPriceDay] = useState<PriceDay>("today");
-  const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
+  const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(
+    null,
+  );
   const [isOnline] = useState(true);
 
   const { settings } = useSettings();
   const { vehicles } = useVehicles();
-  const { sessions: dbSessions, addSession, removeSession } = useChargeSessions(selectedVehicleId ?? undefined);
+  const {
+    sessions: dbSessions,
+    addSession,
+    removeSession,
+  } = useChargeSessions(selectedVehicleId ?? undefined);
 
   // Obtener precios PVPC reales
   const {
@@ -54,16 +64,17 @@ const Index = () => {
   }, [todayPrices]);
 
   const currentHour = new Date().getHours();
-  const currentPrice = todayPrices.find((p) => p.hour === currentHour) ?? todayPrices[0];
+  const currentPrice =
+    todayPrices.find((p) => p.hour === currentHour) ?? todayPrices[0];
   const nextPrice = todayPrices.find((p) => p.hour === currentHour + 1);
 
   // Helper to format time in Spanish timezone
   const formatTimeInSpain = (dateStr: string): string => {
     const date = new Date(dateStr);
-    return date.toLocaleTimeString('es-ES', {
-      timeZone: 'Europe/Madrid',
-      hour: '2-digit',
-      minute: '2-digit',
+    return date.toLocaleTimeString("es-ES", {
+      timeZone: "Europe/Madrid",
+      hour: "2-digit",
+      minute: "2-digit",
       hour12: false,
     });
   };
@@ -73,25 +84,30 @@ const Index = () => {
     // Parse the date and create a new Date object adjusted for display
     const date = new Date(dateStr);
     // Get the date parts in Spanish timezone
-    const parts = new Intl.DateTimeFormat('es-ES', {
-      timeZone: 'Europe/Madrid',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
+    const parts = new Intl.DateTimeFormat("es-ES", {
+      timeZone: "Europe/Madrid",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
     }).formatToParts(date);
-    
-    const year = parseInt(parts.find(p => p.type === 'year')?.value ?? '2026');
-    const month = parseInt(parts.find(p => p.type === 'month')?.value ?? '1') - 1;
-    const day = parseInt(parts.find(p => p.type === 'day')?.value ?? '1');
-    
+
+    const year = parseInt(
+      parts.find((p) => p.type === "year")?.value ?? "2026",
+    );
+    const month =
+      parseInt(parts.find((p) => p.type === "month")?.value ?? "1") - 1;
+    const day = parseInt(parts.find((p) => p.type === "day")?.value ?? "1");
+
     return new Date(year, month, day);
   };
 
   // Convertir sesiones de DB a formato ChargingSession
   const sessions = useMemo<ChargingSession[]>(() => {
     return dbSessions.map((s) => {
-      const vehicleName = vehicles.find((v) => v.id === s.vehicleId)?.name ?? "Vehículo";
-      const avgPrice = s.averagePrice ?? (s.kWh > 0 ? (s.cost ?? 0) / s.kWh : 0);
+      const vehicleName =
+        vehicles.find((v) => v.id === s.vehicleId)?.name ?? "Vehículo";
+      const avgPrice =
+        s.averagePrice ?? (s.kWh > 0 ? (s.cost ?? 0) / s.kWh : 0);
 
       return {
         id: s.id,
@@ -113,7 +129,11 @@ const Index = () => {
   const sessionsWithDiscount = useMemo<ChargingSession[]>(() => {
     return sessions.map((session) => {
       const discountedCost = applyBonusDiscount(session.totalCost, settings);
-      const fuelResult = calculateFuelSavings(session.kWhCharged, discountedCost, settings);
+      const fuelResult = calculateFuelSavings(
+        session.kWhCharged,
+        discountedCost,
+        settings,
+      );
 
       return {
         ...session,
@@ -170,7 +190,7 @@ const Index = () => {
       const month = dateObj.getMonth(); // 0-11
       // Rough estimate: April-October is summer time (CEST, UTC+2)
       const isSummerTime = month >= 3 && month <= 9;
-      const offset = isSummerTime ? '+02:00' : '+01:00';
+      const offset = isSummerTime ? "+02:00" : "+01:00";
       return `${date}T${time}:00${offset}`;
     };
 
@@ -196,9 +216,9 @@ const Index = () => {
   return (
     <div
       className="min-h-screen bg-background"
-      style={{ 
+      style={{
         paddingTop: "calc(4rem + env(safe-area-inset-top, 0px))",
-        paddingBottom: "calc(5.5rem + env(safe-area-inset-bottom, 0px))" 
+        paddingBottom: "calc(5.5rem + env(safe-area-inset-bottom, 0px))",
       }}
     >
       <Header />
@@ -261,15 +281,6 @@ const Index = () => {
       </main>
 
       {/* Floating buttons container - respects main content width */}
-      <div 
-        className="pointer-events-none fixed inset-x-0 z-40 mx-auto max-w-md px-4"
-        style={{ bottom: 'calc(6rem + env(safe-area-inset-bottom, 0px))' }}
-      >
-        <div className="pointer-events-auto relative flex justify-between">
-          <CalculatorFloatingButton />
-          <AddSessionSheet onAddSession={handleAddSession} />
-        </div>
-      </div>
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
     </div>
   );
