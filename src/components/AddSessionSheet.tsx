@@ -30,9 +30,9 @@ import {
 } from "@/lib/sessionCostCalculator";
 import { useSettings } from "@/hooks/useSettings";
 import { useVehicles } from "@/hooks/useVehicles";
+import { useChargeSessions } from "@/hooks/useChargeSessions";
 import { toast } from "sonner";
 import { CostResultDisplay } from "@/components/CostResultDisplay";
-import { formatCurrency } from "@/lib/priceUtils";
 
 const getLocationHelpText = (
   isHome: boolean,
@@ -78,21 +78,7 @@ const SubmitButtonContent = ({
   return <>Guardar sesión</>;
 };
 
-interface AddSessionSheetProps {
-  onAddSession?: (session: {
-    date: string;
-    startTime: string;
-    endTime: string;
-    kWhCharged: number;
-    location: string;
-    baseCost: number;
-    discountedCost: number;
-    averagePrice: number;
-    vehicleId: string;
-  }) => Promise<void>;
-}
-
-export const AddSessionSheet = ({ onAddSession }: AddSessionSheetProps) => {
+export const AddSessionSheet = () => {
   const [open, setOpen] = useState(false);
   const [date, setDate] = useState(
     () => new Date().toISOString().split("T")[0],
@@ -111,6 +97,7 @@ export const AddSessionSheet = ({ onAddSession }: AddSessionSheetProps) => {
 
   const { settings } = useSettings();
   const { vehicles, favoriteVehicle, refresh: refreshVehicles } = useVehicles();
+  const { addSession } = useChargeSessions();
 
   // Determinar si es tarifa fija (no necesita horas)
   const isFixedContract = settings?.contractType === "FIXED_SINGLE";
@@ -192,6 +179,18 @@ export const AddSessionSheet = ({ onAddSession }: AddSessionSheetProps) => {
     return () => clearTimeout(timeout);
   }, [calculateCost]);
 
+  // Build timestamps with explicit Spanish timezone offset
+  const buildSpanishTimestamp = (dateStr: string, time: string): string => {
+    if (!time) {
+      return `${dateStr}T00:00:00+01:00`;
+    }
+    const dateObj = new Date(`${dateStr}T12:00:00`);
+    const month = dateObj.getMonth();
+    const isSummerTime = month >= 3 && month <= 9;
+    const offset = isSummerTime ? "+02:00" : "+01:00";
+    return `${dateStr}T${time}:00${offset}`;
+  };
+
   const handleSubmit = async () => {
     const canSubmit = isHome
       ? canCalculate && costResult && vehicleId
@@ -207,16 +206,19 @@ export const AddSessionSheet = ({ onAddSession }: AddSessionSheetProps) => {
         : Number.parseFloat(manualCost);
       const avgPrice = isHome ? costResult!.averagePrice : cost / kWhValue;
 
-      await onAddSession?.({
-        date,
-        startTime: isHome ? startTime : "",
-        endTime: isHome ? endTime : "",
-        kWhCharged: kWhValue,
-        location,
+      const startedAt = buildSpanishTimestamp(date, isHome ? startTime : "");
+      const endedAt = buildSpanishTimestamp(date, isHome ? endTime : "");
+
+      await addSession({
+        vehicleId,
+        startedAt,
+        endedAt,
+        kWh: kWhValue,
+        cost,
         baseCost: isHome ? costResult!.baseCost : cost,
         discountedCost: cost,
         averagePrice: avgPrice,
-        vehicleId,
+        location,
       });
 
       toast.success("Sesión guardada correctamente", {

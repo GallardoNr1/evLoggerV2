@@ -1,8 +1,6 @@
 import { useState, useMemo } from "react";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
-import { CalculatorFloatingButton } from "@/components/CalculatorFloatingButton";
-import { AddSessionSheet } from "@/components/AddSessionSheet";
 import { InfoContent } from "@/components/InfoContent";
 import { DashboardView, PricesView, StatsView, SettingsView } from "@/views";
 import { useSettings } from "@/hooks/useSettings";
@@ -29,7 +27,6 @@ const Index = () => {
   const { vehicles } = useVehicles();
   const {
     sessions: dbSessions,
-    addSession,
     removeSession,
   } = useChargeSessions(selectedVehicleId ?? undefined);
 
@@ -166,48 +163,6 @@ const Index = () => {
       worstHour,
     };
   }, [settings, sessions, todayPrices]);
-
-  const handleAddSession = async (session: {
-    date: string;
-    startTime: string;
-    endTime: string;
-    kWhCharged: number;
-    location: string;
-    baseCost: number;
-    discountedCost: number;
-    averagePrice: number;
-    vehicleId: string;
-  }) => {
-    // Build timestamps with explicit Spanish timezone offset to avoid UTC conversion issues
-    // Spain is UTC+1 (CET) or UTC+2 (CEST during summer)
-    const buildSpanishTimestamp = (date: string, time: string): string => {
-      if (!time) {
-        // For sessions without time, use midnight in Spanish timezone
-        return `${date}T00:00:00+01:00`;
-      }
-      // Determine if date is in summer time (CEST = UTC+2) or winter time (CET = UTC+1)
-      const dateObj = new Date(`${date}T12:00:00`);
-      const month = dateObj.getMonth(); // 0-11
-      // Rough estimate: April-October is summer time (CEST, UTC+2)
-      const isSummerTime = month >= 3 && month <= 9;
-      const offset = isSummerTime ? "+02:00" : "+01:00";
-      return `${date}T${time}:00${offset}`;
-    };
-
-    const startedAt = buildSpanishTimestamp(session.date, session.startTime);
-    const endedAt = buildSpanishTimestamp(session.date, session.endTime);
-
-    await addSession({
-      vehicleId: session.vehicleId,
-      startedAt,
-      endedAt,
-      kWh: session.kWhCharged,
-      cost: session.discountedCost,
-      baseCost: session.baseCost,
-      averagePrice: session.averagePrice,
-      location: session.location,
-    });
-  };
 
   const handleDeleteSession = async (id: string) => {
     await removeSession(id);
