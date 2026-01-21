@@ -12,6 +12,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+type InstallationType = "mono" | "tri";
+
 export const ChargingCalculator = () => {
   const { vehicles } = useVehicles();
   const [selectedVehicleId, setSelectedVehicleId] = useState<string>("");
@@ -19,10 +21,13 @@ export const ChargingCalculator = () => {
   const [currentPercent, setCurrentPercent] = useState<number>(20);
   const [targetPercent, setTargetPercent] = useState<number>(80);
   const [hoursAvailable, setHoursAvailable] = useState<number>(8);
-  const [voltage, setVoltage] = useState<number>(230); // Voltios
-
-  // Común en España: monofásico 230V, trifásico 400V
-  const [phases, setPhases] = useState<1 | 3>(1);
+  
+  // Tipo de instalación: monofásico (230V) o trifásico (400V)
+  const [installationType, setInstallationType] = useState<InstallationType>("mono");
+  
+  // Derivar voltaje y fases automáticamente
+  const voltage = installationType === "mono" ? 230 : 400;
+  const phases = installationType === "mono" ? 1 : 3;
 
   const calculation = useMemo(() => {
     const percentToCharge = targetPercent - currentPercent;
@@ -180,38 +185,21 @@ export const ChargingCalculator = () => {
           />
         </div>
 
-        {/* Configuración eléctrica */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-2">
-            <Label className="text-sm text-muted-foreground">Voltaje</Label>
-            <Select
-              value={voltage.toString()}
-              onValueChange={(v) => setVoltage(Number(v))}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="230">230V (Monofásico)</SelectItem>
-                <SelectItem value="400">400V (Trifásico)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label className="text-sm text-muted-foreground">Fases</Label>
-            <Select
-              value={phases.toString()}
-              onValueChange={(v) => setPhases(Number(v) as 1 | 3)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">Monofásico</SelectItem>
-                <SelectItem value="3">Trifásico</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+        {/* Configuración eléctrica - selector único */}
+        <div className="space-y-2">
+          <Label className="text-sm text-muted-foreground">Tipo de instalación</Label>
+          <Select
+            value={installationType}
+            onValueChange={(v) => setInstallationType(v as InstallationType)}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="mono">Monofásico (230V)</SelectItem>
+              <SelectItem value="tri">Trifásico (400V)</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Resultados */}
